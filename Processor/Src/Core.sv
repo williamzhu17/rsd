@@ -139,7 +139,19 @@ output
         BTB btb( npStageIF, ifStageIF );
         BranchPredictor brPred( npStageIF, ifStageIF, ctrlIF );
     FetchStage ifStage( ifStageIF, npStageIF, ctrlIF, debugIF, perfCounterIF );
-        ICache iCache( npStageIF, ifStageIF, cacheSystemIF );
+        // FVT abstracting out icache BEGIN
+        // ICache iCache( npStageIF, ifStageIF, cacheSystemIF );
+
+        always_comb begin
+            for (int i = 0; i < FETCH_WIDTH; i++)
+                ifStageIF.icReadHit[i] = ifStageIF.icRE;
+        end
+
+        assign cacheSystemIF.icMemAccessReq = '0;
+        assign cacheSystemIF.icFlushReqAck = 1'b1;
+        assign cacheSystemIF.icFlushComplete = 1'b1;
+
+        // FVT END
     
     PreDecodeStage pdStage( pdStageIF, ifStageIF, ctrlIF, debugIF );
     DecodeStage idStage( idStageIF, pdStageIF, ctrlIF, debugIF, perfCounterIF );
@@ -185,7 +197,30 @@ output
         LoadQueue loadQueue( loadStoreUnitIF, recoveryManagerIF );
         StoreQueue storeQueue( loadStoreUnitIF, recoveryManagerIF );
         StoreCommitter storeCommitter(loadStoreUnitIF, recoveryManagerIF, ioUnitIF, debugIF, perfCounterIF);
-        DCache dCache( loadStoreUnitIF, cacheSystemIF, ctrlIF, recoveryManagerIF);
+        // FVT abstracting out dcache BEGIN
+        // DCache dCache( loadStoreUnitIF, cacheSystemIF, ctrlIF, recoveryManagerIF);
+
+        assign loadStoreUnitIF.dcReadHit = '{default: 1'b1};
+        assign loadStoreUnitIF.dcReadBusy = '0;
+        assign loadStoreUnitIF.dcWriteHit = 1'b1;
+        assign loadStoreUnitIF.dcWriteReqAck = loadStoreUnitIF.dcWriteReq;
+        assign loadStoreUnitIF.dcWriteBusy = '0;
+        assign loadStoreUnitIF.mshrAddrHit = '0;
+        assign loadStoreUnitIF.mshrAddrHitMSHRID = '0;
+        assign loadStoreUnitIF.mshrReadHit = '0;
+        assign loadStoreUnitIF.mshrReadData = '0;
+        assign loadStoreUnitIF.mshrValid = '0;
+        assign loadStoreUnitIF.mshrPhase = '0;
+        assign loadStoreUnitIF.loadHasAllocatedMSHR = '0;
+        assign loadStoreUnitIF.loadMSHRID = '0;
+        assign loadStoreUnitIF.storeHasAllocatedMSHR = '0;
+        assign loadStoreUnitIF.storeMSHRID = '0;
+
+        assign cacheSystemIF.dcMemAccessReq = '0;
+        assign cacheSystemIF.dcFlushReqAck = 1'b1;
+        assign cacheSystemIF.dcFlushComplete = 1'b1;
+
+        // FVT END
     MemoryRegisterWriteStage memRwStage( /*memRwStageIF,*/ maStageIF, loadStoreUnitIF, registerFileIF, activeListIF, recoveryManagerIF, ctrlIF, debugIF );
 
 `ifdef RSD_MARCH_FP_PIPE

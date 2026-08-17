@@ -136,6 +136,19 @@ module ActiveList(
         .rv( readData )
     );
 
+    // FVT active ROB entries BEGIN
+
+    logic activeListEntryValid[ACTIVE_LIST_ENTRY_NUM];
+
+    generate
+        for (genvar i = 0; i < ACTIVE_LIST_ENTRY_NUM; i++) begin
+            assign activeListEntryValid[i] = 
+                (count != 0) && (ActiveListPtrToAge(i, headPtr) < headPtr + count);
+        end
+    endgenerate
+
+    // FVT END
+
     always_comb begin
         pushTail = port.pushTail;
         pushedTailData = port.pushedTailData;
