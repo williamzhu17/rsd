@@ -139,11 +139,13 @@ module ActiveList(
     // FVT active ROB entries BEGIN
 
     logic activeListEntryValid[ACTIVE_LIST_ENTRY_NUM];
+    ActiveListEntry activeListEntry[ACTIVE_LIST_ENTRY_NUM];
 
     generate
         for (genvar i = 0; i < ACTIVE_LIST_ENTRY_NUM; i++) begin
-            assign activeListEntryValid[i] = 
+            assign activeListEntryValid[i] =
                 (count != 0) && (ActiveListPtrToAge(i, headPtr) < headPtr + count);
+            assign activeListEntry[i] = ActiveListEntry'(activeList.debugValue[i]);
         end
     endgenerate
 

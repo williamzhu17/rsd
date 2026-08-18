@@ -6,7 +6,7 @@ package MicroArchConf;
 
 // ---- Front-end
 // Fetch width (instructions). This parameter is configurable.
-localparam CONF_FETCH_WIDTH = 2;
+localparam CONF_FETCH_WIDTH = 1;
 
 // These parameters cannot be changed and currently must be equal to FETCH_WIDTH.
 localparam CONF_DECODE_WIDTH = CONF_FETCH_WIDTH;      // Decode width
@@ -17,7 +17,7 @@ localparam CONF_DISPATCH_WIDTH = CONF_FETCH_WIDTH;    // Dispatch width
 // ---- Commit
 // Commit width (instructions). This parameter is configurable.
 // must be equal or larger than RENAME_WIDTH (FETCH_WIDTH) for recovery
-localparam CONF_COMMIT_WIDTH = 2;     
+localparam CONF_COMMIT_WIDTH = 1;     
 
 
 // --- Back-end
