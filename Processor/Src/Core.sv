@@ -201,20 +201,20 @@ output
         // DCache dCache( loadStoreUnitIF, cacheSystemIF, ctrlIF, recoveryManagerIF);
 
         assign loadStoreUnitIF.dcReadHit = '{default: 1'b1};
-        assign loadStoreUnitIF.dcReadBusy = '0;
+        assign loadStoreUnitIF.dcReadBusy = '{default: 1'b0};
         assign loadStoreUnitIF.dcWriteHit = 1'b1;
         assign loadStoreUnitIF.dcWriteReqAck = loadStoreUnitIF.dcWriteReq;
         assign loadStoreUnitIF.dcWriteBusy = '0;
-        assign loadStoreUnitIF.mshrAddrHit = '0;
-        assign loadStoreUnitIF.mshrAddrHitMSHRID = '0;
-        assign loadStoreUnitIF.mshrReadHit = '0;
-        assign loadStoreUnitIF.mshrReadData = '0;
-        assign loadStoreUnitIF.mshrValid = '0;
-        assign loadStoreUnitIF.mshrPhase = '0;
-        assign loadStoreUnitIF.loadHasAllocatedMSHR = '0;
-        assign loadStoreUnitIF.loadMSHRID = '0;
-        assign loadStoreUnitIF.storeHasAllocatedMSHR = '0;
-        assign loadStoreUnitIF.storeMSHRID = '0;
+        assign loadStoreUnitIF.mshrAddrHit = '{default: 1'b0};
+        assign loadStoreUnitIF.mshrAddrHitMSHRID = '{default: '0};
+        assign loadStoreUnitIF.mshrReadHit = '{default: 1'b0};
+        assign loadStoreUnitIF.mshrReadData = '{default: '0};
+        assign loadStoreUnitIF.mshrValid = '{default: 1'b0};
+        assign loadStoreUnitIF.mshrPhase = '{default: MSHR_PHASE_INVALID};
+        assign loadStoreUnitIF.loadHasAllocatedMSHR = '{default: 1'b0};
+        assign loadStoreUnitIF.loadMSHRID = '{default: '0};
+        assign loadStoreUnitIF.storeHasAllocatedMSHR = '{default: 1'b0};
+        assign loadStoreUnitIF.storeMSHRID = '{default: '0};
 
         assign cacheSystemIF.dcMemAccessReq = '0;
         assign cacheSystemIF.dcFlushReqAck = 1'b1;
