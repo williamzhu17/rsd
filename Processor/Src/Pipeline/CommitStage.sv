@@ -254,6 +254,15 @@ module CommitStage(
 
     PipelinePhase phase;
 
+    // FVT commit-slot occupancy BEGIN
+    logic commitEntryValid[COMMIT_WIDTH];
+    generate
+        for (genvar i = 0; i < COMMIT_WIDTH; i++) begin
+            assign commitEntryValid[i] = activeList.validEntryNum > i;
+        end
+    endgenerate
+    // FVT END
+
     PC_Path lastCommittedPC, prevLastCommittedPC;
 
     always_ff@(posedge port.clk) begin
