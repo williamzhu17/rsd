@@ -24,7 +24,7 @@ localparam PC_GOAL = 32'h80001004;
 //
 
  // This option compresses PC to 19 bits for reducing resource consumption.
-`define RSD_NARROW_PC
+// `define RSD_NARROW_PC
 // The PC compression is achieved by leveraging the memory map.
 // The memory map in the logical address space is as follows.
 //       0x0000_1000 --0x0000_FFFF: Section 0 (ROM)
