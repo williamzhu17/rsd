@@ -639,6 +639,7 @@ module DistributedDualPortRAM #(
     parameter ENTRY_BIT_SIZE = 64
 )( 
     input logic clk,
+    input logic rst, // FVT: sync reset for formal reset analysis
     input logic we,
     input logic [$clog2(ENTRY_NUM)-1: 0] wa,
     input logic [ENTRY_BIT_SIZE-1: 0] wv,
@@ -651,10 +652,18 @@ module DistributedDualPortRAM #(
     typedef logic [ENTRY_BIT_SIZE-1: 0] Value;
     Value array[ENTRY_NUM];  // synthesis syn_ramstyle = "select_ram"
 
+    // FVT: sync reset RAM for formal reset analysis BEGIN
     always_ff @(posedge clk) begin
-        if(we)
+        if (rst) begin
+            for (int i = 0; i < ENTRY_NUM; i++) begin
+                array[i] <= '0;
+            end
+        end
+        else if (we) begin
             array[wa] <= wv;
+        end
     end
+    // FVT END
     
     always_comb begin
         rv = array[ra];
@@ -686,6 +695,7 @@ module RegisterDualPortRAM #(
     parameter ENTRY_BIT_SIZE = 64
 )( 
     input logic clk,
+    input logic rst, // FVT: sync reset for formal reset analysis
     input logic we,
     input logic [$clog2(ENTRY_NUM)-1: 0] wa,
     input logic [ENTRY_BIT_SIZE-1: 0] wv,
@@ -698,10 +708,18 @@ module RegisterDualPortRAM #(
     typedef logic [ENTRY_BIT_SIZE-1: 0] Value;
     Value array[ENTRY_NUM];   // synthesis syn_ramstyle = "registers"
 
+    // FVT: sync reset RAM for formal reset analysis BEGIN
     always_ff @(posedge clk) begin
-        if(we)
+        if (rst) begin
+            for (int i = 0; i < ENTRY_NUM; i++) begin
+                array[i] <= '0;
+            end
+        end
+        else if (we) begin
             array[wa] <= wv;
+        end
     end
+    // FVT END
     
     always_comb begin
         rv = array[ra];
@@ -795,6 +813,7 @@ module LVT_DistributedMultiPortRAM #(
     parameter WRITE_NUM = 3
 )( 
     input logic clk,
+    input logic rst, // FVT: sync reset for formal reset analysis
     input logic we[ WRITE_NUM ],
     input logic [$clog2(ENTRY_NUM)-1: 0] wa[WRITE_NUM],
     input logic [ENTRY_BIT_SIZE-1: 0] wv[WRITE_NUM],
@@ -819,18 +838,18 @@ module LVT_DistributedMultiPortRAM #(
 
 `ifdef RSD_SYNTHESIS_OPT_MICROSEMI
             RegisterMultiPortRAM #(ENTRY_NUM, WRITE_NUM_BIT_SIZE, READ_NUM, WRITE_NUM)
-                lvt(clk, we, wa, lvi, ra, lvo);
+                lvt(clk, rst, we, wa, lvi, ra, lvo); // FVT: sync reset for formal reset analysis
 `else
             // For Xilinx
             XOR_DistributedMultiPortRAM #(ENTRY_NUM, WRITE_NUM_BIT_SIZE, READ_NUM, WRITE_NUM)
-                lvt(clk, we, wa, lvi, ra, lvo);
+                lvt(clk, rst, we, wa, lvi, ra, lvo); // FVT: sync reset for formal reset analysis
 `endif
 
             // Duplicate as many as needed for read/write
             for (genvar j = 0; j < WRITE_NUM; j++) begin
                 for ( genvar i = 0; i < READ_NUM; i++) begin
                     DistributedDualPortRAM#(ENTRY_NUM, ENTRY_BIT_SIZE)
-                        rBank(clk, we[j], wa[j], wv[j], ra[i], rvBank[i][j]);
+                        rBank(clk, rst, we[j], wa[j], wv[j], ra[i], rvBank[i][j]); // FVT: sync reset for formal reset analysis
                 end
             end
 
@@ -847,7 +866,7 @@ module LVT_DistributedMultiPortRAM #(
             // Duplicate as many as needed for read
             for (genvar i = 0; i < READ_NUM; i++) begin
                 DistributedDualPortRAM#(ENTRY_NUM, ENTRY_BIT_SIZE)
-                    rBank(clk, we[0], wa[0], wv[0], ra[i], rv[i]);
+                    rBank(clk, rst, we[0], wa[0], wv[0], ra[i], rv[i]); // FVT: sync reset for formal reset analysis
             end
         end
         
@@ -857,12 +876,21 @@ module LVT_DistributedMultiPortRAM #(
 `ifndef RSD_SYNTHESIS
     // This signal will be written in a test bench, so set public for verilator.
     Value debugValue[ ENTRY_NUM ] /*verilator public*/;  
+    // FVT: sync reset RAM for formal reset analysis BEGIN
     always_ff @ ( posedge clk ) begin
-        for(int i = 0; i < WRITE_NUM; i++) begin
-            if( we[i] )
-                debugValue[ wa[i] ] <= wv[i];
+        if (rst) begin
+            for (int k = 0; k < ENTRY_NUM; k++) begin
+                debugValue[k] <= '0;
+            end
+        end
+        else begin
+            for(int i = 0; i < WRITE_NUM; i++) begin
+                if( we[i] )
+                    debugValue[ wa[i] ] <= wv[i];
+            end
         end
     end
+    // FVT END
 
     generate
         for (genvar i = 0; i < READ_NUM; i++) begin
@@ -891,6 +919,7 @@ module XOR_DistributedMultiPortRAM #(
     parameter WRITE_NUM = 2
 )( 
     input  logic clk,
+    input  logic rst, // FVT: sync reset for formal reset analysis
     input  logic we[WRITE_NUM],
     input  logic [$clog2(ENTRY_NUM)-1: 0] wa[WRITE_NUM],
     input  logic [ENTRY_BIT_SIZE-1: 0] wv[WRITE_NUM],
@@ -928,7 +957,7 @@ module XOR_DistributedMultiPortRAM #(
                 if (j != i) begin
                     // The bank of i == j is not necessary.
                     DistributedDualPortRAM#(ENTRY_NUM, ENTRY_BIT_SIZE)
-                        wBank(clk, we[j], wa[j], rwbWriteValue[j], wbReadAddr[i], wbReadValue[j][i]);
+                        wBank(clk, rst, we[j], wa[j], rwbWriteValue[j], wbReadAddr[i], wbReadValue[j][i]); // FVT: sync reset for formal reset analysis
                 end
             end
         end
@@ -944,7 +973,7 @@ module XOR_DistributedMultiPortRAM #(
         for (genvar j = 0; j < WRITE_NUM; j++) begin : rj
             for (genvar i = 0; i < READ_NUM; i++) begin : ri
                 DistributedDualPortRAM#(ENTRY_NUM, ENTRY_BIT_SIZE)
-                    rBank(clk, we[j], wa[j], rwbWriteValue[j], rbReadAddr[i], rbReadValue[j][i]);
+                    rBank(clk, rst, we[j], wa[j], rwbWriteValue[j], rbReadAddr[i], rbReadValue[j][i]); // FVT: sync reset for formal reset analysis
             end
         end
 
@@ -996,12 +1025,21 @@ module XOR_DistributedMultiPortRAM #(
     // For Debug
 `ifndef RSD_SYNTHESIS
     Value debugValue[ENTRY_NUM];
+    // FVT: sync reset RAM for formal reset analysis BEGIN
     always_ff @(posedge clk) begin
-        for (int i = 0; i < WRITE_NUM; i++) begin
-            if (we[i])
-                debugValue[ wa[i] ] <= wv[i];
+        if (rst) begin
+            for (int k = 0; k < ENTRY_NUM; k++) begin
+                debugValue[k] <= '0;
+            end
+        end
+        else begin
+            for (int i = 0; i < WRITE_NUM; i++) begin
+                if (we[i])
+                    debugValue[ wa[i] ] <= wv[i];
+            end
         end
     end
+    // FVT END
 
     generate
         for (genvar i = 0; i < READ_NUM; i++) begin
@@ -1025,6 +1063,7 @@ module DistributedMultiPortRAM #(
     parameter WRITE_NUM = 3
 )( 
     input logic clk,
+    input logic rst, // FVT: sync reset for formal reset analysis
     input logic we[ WRITE_NUM ],
     input logic [$clog2(ENTRY_NUM)-1: 0] wa[WRITE_NUM],
     input logic [ENTRY_BIT_SIZE-1: 0] wv[WRITE_NUM],
@@ -1040,28 +1079,37 @@ module DistributedMultiPortRAM #(
             (INDEX_BIT_SIZE <= 4 && ENTRY_BIT_SIZE > 64)) begin
 `ifdef RSD_SYNTHESIS_OPT_MICROSEMI
             RegisterMultiPortRAM #(ENTRY_NUM, ENTRY_BIT_SIZE, READ_NUM, WRITE_NUM)
-                body(clk, we, wa, wv, ra, rv);
+                body(clk, rst, we, wa, wv, ra, rv); // FVT: sync reset for formal reset analysis
 `else
             // For Xilinx
             XOR_DistributedMultiPortRAM #(ENTRY_NUM, ENTRY_BIT_SIZE, READ_NUM, WRITE_NUM)
-                body(clk, we, wa, wv, ra, rv);
+                body(clk, rst, we, wa, wv, ra, rv); // FVT: sync reset for formal reset analysis
 `endif
         end
         else begin
             LVT_DistributedMultiPortRAM#(ENTRY_NUM, ENTRY_BIT_SIZE, READ_NUM, WRITE_NUM)
-                body(clk, we, wa, wv, ra, rv);
+                body(clk, rst, we, wa, wv, ra, rv); // FVT: sync reset for formal reset analysis
         end
     endgenerate
 
     // For Debug
 `ifndef RSD_SYNTHESIS
     Value debugValue[ENTRY_NUM] /*verilator public*/;
+    // FVT: sync reset RAM for formal reset analysis BEGIN
     always_ff @(posedge clk) begin
-        for (int i = 0; i < WRITE_NUM; i++) begin
-            if (we[i])
-                debugValue[ wa[i] ] <= wv[i];
+        if (rst) begin
+            for (int k = 0; k < ENTRY_NUM; k++) begin
+                debugValue[k] <= '0;
+            end
+        end
+        else begin
+            for (int i = 0; i < WRITE_NUM; i++) begin
+                if (we[i])
+                    debugValue[ wa[i] ] <= wv[i];
+            end
         end
     end
+    // FVT END
 
     generate
         for (genvar i = 0; i < READ_NUM; i++) begin
@@ -1088,6 +1136,7 @@ module RegisterMultiPortRAM #(
     parameter WRITE_NUM = 4
 )( 
     input logic clk,
+    input logic rst, // FVT: sync reset for formal reset analysis
     input logic we[WRITE_NUM],
     input logic [$clog2(ENTRY_NUM)-1: 0] wa[WRITE_NUM],
     input logic [ENTRY_BIT_SIZE-1: 0] wv[WRITE_NUM],
@@ -1104,14 +1153,22 @@ module RegisterMultiPortRAM #(
     Value array[ENTRY_NUM];
 `endif 
 
-    generate 
-        for (genvar i = 0; i < WRITE_NUM; i++) begin
-            always_ff @(posedge clk) begin
-                if (we[i])
-                    array[ wa[i] ] <= wv[i];
+    // FVT: sync reset RAM for formal reset analysis BEGIN
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            for (int k = 0; k < ENTRY_NUM; k++) begin
+                array[k] <= '0;
             end
         end
-    endgenerate
+        else begin
+            for (int i = 0; i < WRITE_NUM; i++) begin
+                if (we[i]) begin
+                    array[wa[i]] <= wv[i];
+                end
+            end
+        end
+    end
+    // FVT END
 
     always_comb begin
         for (int i = 0; i < READ_NUM; i++) begin
@@ -1122,12 +1179,21 @@ module RegisterMultiPortRAM #(
     // For Debug
 `ifndef RSD_SYNTHESIS
     Value debugValue[ENTRY_NUM] /*verilator public*/;
+    // FVT: sync reset RAM for formal reset analysis BEGIN
     always_ff @(posedge clk) begin
-        for (int i = 0; i < WRITE_NUM; i++) begin
-            if (we[i])
-                debugValue[ wa[i] ] <= wv[i];
+        if (rst) begin
+            for (int k = 0; k < ENTRY_NUM; k++) begin
+                debugValue[k] <= '0;
+            end
+        end
+        else begin
+            for (int i = 0; i < WRITE_NUM; i++) begin
+                if (we[i])
+                    debugValue[ wa[i] ] <= wv[i];
+            end
         end
     end
+    // FVT END
 
     generate
         for (genvar i = 0; i < READ_NUM; i++) begin
@@ -1154,6 +1220,7 @@ module DistributedMultiBankRAM #(
     parameter WRITE_NUM = 2
 )( 
     input  logic clk,
+    input  logic rst, // FVT: sync reset for formal reset analysis
     input  logic we[WRITE_NUM],
     input  logic [$clog2(ENTRY_NUM)-1: 0] wa[WRITE_NUM],
     input  logic [ENTRY_BIT_SIZE-1: 0] wv[WRITE_NUM],
@@ -1171,11 +1238,11 @@ module DistributedMultiBankRAM #(
     generate
         if (BANK_NUM >= 2) begin
             DistributedMultiBankRAM_ForGE2Banks#(ENTRY_NUM, ENTRY_BIT_SIZE, READ_NUM, WRITE_NUM)
-                rBank(clk, we, wa, wv, ra, rv);
+                rBank(clk, rst, we, wa, wv, ra, rv); // FVT: sync reset for formal reset analysis
         end
         else begin
             DistributedDualPortRAM#(ENTRY_NUM, ENTRY_BIT_SIZE)
-                rBank(clk, we[0], wa[0], wv[0], ra[0], rv[0]);
+                rBank(clk, rst, we[0], wa[0], wv[0], ra[0], rv[0]); // FVT: sync reset for formal reset analysis
         end
     endgenerate
 
@@ -1192,12 +1259,21 @@ module DistributedMultiBankRAM #(
         end
     end
 
+    // FVT: sync reset RAM for formal reset analysis BEGIN
     always_ff @(posedge clk) begin
-        for (int i = 0; i < WRITE_NUM; i++) begin
-            if (we[i])
-                debugValue[ wa[i] ] <= wv[i];
+        if (rst) begin
+            for (int k = 0; k < ENTRY_NUM; k++) begin
+                debugValue[k] <= '0;
+            end
+        end
+        else begin
+            for (int i = 0; i < WRITE_NUM; i++) begin
+                if (we[i])
+                    debugValue[ wa[i] ] <= wv[i];
+            end
         end
     end
+    // FVT END
 
     generate
         for (genvar i = 0; i < READ_NUM; i++) begin
@@ -1223,6 +1299,7 @@ module DistributedMultiBankRAM_ForGE2Banks #(
     parameter WRITE_NUM = 2
 )( 
     input  logic clk,
+    input  logic rst, // FVT: sync reset for formal reset analysis
     input  logic we[WRITE_NUM],
     input  logic [$clog2(ENTRY_NUM)-1: 0] wa[WRITE_NUM],
     input  logic [ENTRY_BIT_SIZE-1: 0] wv[WRITE_NUM],
@@ -1256,7 +1333,8 @@ module DistributedMultiBankRAM_ForGE2Banks #(
             if (ENTRY_BIT_SIZE < 8) begin
                 RegisterDualPortRAM#(ENTRY_NUM / BANK_NUM, ENTRY_BIT_SIZE)
                     rBank(
-                        clk, 
+                        clk,
+                        rst, // FVT: sync reset for formal reset analysis
                         weBank[i], 
                         waBank[i][INDEX_BIT_SIZE-1 : BANK_NUM_BIT_WIDTH], 
                         wvBank[i], 
@@ -1267,7 +1345,8 @@ module DistributedMultiBankRAM_ForGE2Banks #(
             else begin
                 DistributedDualPortRAM#(ENTRY_NUM / BANK_NUM, ENTRY_BIT_SIZE)
                     rBank(
-                        clk, 
+                        clk,
+                        rst, // FVT: sync reset for formal reset analysis
                         weBank[i], 
                         waBank[i][INDEX_BIT_SIZE-1 : BANK_NUM_BIT_WIDTH], 
                         wvBank[i], 

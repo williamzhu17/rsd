@@ -52,6 +52,7 @@ module RegisterFile(
         .WRITE_NUM( REG_WRITE_NUM )
     ) phyReg (
         .clk( port.clk ),
+        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( regWE ),
         .wa( dstRegNum ),
         .wv( dstRegData ),
@@ -156,6 +157,7 @@ module RegisterFile(
         .WRITE_NUM( FP_WRITE_NUM )
     ) phyFPReg (
         .clk( port.clk ),
+        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( fpRegWE ),
         .wa( dstFPRegNum ),
         .wv( dstFPRegData ),

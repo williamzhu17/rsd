@@ -32,6 +32,7 @@ module RetirementRMT(RenameLogicIF.RetirementRMT port);
         .WRITE_NUM( COMMIT_WIDTH )
     ) regRMT ( 
         .clk( port.clk ),
+        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( we ),
         .wa( writeLogRegNum ),
         .wv( writePhyRegNum ),

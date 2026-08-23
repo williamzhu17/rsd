@@ -134,6 +134,7 @@ output
         .WRITE_NUM( PUSH_WIDTH )
     ) freeList (
         .clk( clk ),
+        .rst( rst ), // FVT: sync reset for formal reset analysis
         .wa( wa ),
         .we( we ),
         .wv( wv ),

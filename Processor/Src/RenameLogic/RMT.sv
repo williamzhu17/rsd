@@ -51,6 +51,7 @@ module RMT( RenameLogicIF.RMT port );
         .WRITE_NUM( COMMIT_WIDTH )
     ) regRMT (
         .clk( port.clk ),
+        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( rmtWE ),
         .wa( rmtWA ),
         .wv( rmtWV ),

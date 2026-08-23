@@ -35,6 +35,7 @@ module DestinationRAM (WakeupSelectIF.DestinationRAM port);
         .WRITE_NUM( DISPATCH_WIDTH )
     ) dstRAM (
         .clk( port.clk ),
+        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( write ),
         .wa( writePtr ),
         .wv( writeData ),

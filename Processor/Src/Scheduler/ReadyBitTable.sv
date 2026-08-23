@@ -50,7 +50,7 @@ module ReadyBitTable #(
     DistributedMultiPortRAM #(
         1 << REG_NUM_BIT_WIDTH, 1, READY_READ_NUM, READY_WRITE_NUM
     )
-    radyBitTable(clk, readyWE, readyWA, readyWV, readyRA, readyRV);
+    radyBitTable(clk, rst, readyWE, readyWA, readyWV, readyRA, readyRV); // FVT: sync reset for formal reset analysis
 
 
     RegNumPath resetIndex;
