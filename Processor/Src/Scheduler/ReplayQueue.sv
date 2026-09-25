@@ -105,7 +105,6 @@ module ReplayQueue(
         .ENTRY_BIT_SIZE( $bits(ReplayQueueEntry) )
     ) replayQueue (
         .clk(port.clk),
-        .rst(port.rst), // FVT: sync reset for formal reset analysis
         .we(pushEntry),
         .wa(tailPtr),
         .wv(recordData),

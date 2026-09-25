@@ -31,6 +31,9 @@ module RegisterFile(
     PScalarRegNumPath srcRegNum  [ REG_READ_NUM ];
     PRegDataPath srcRegData [ REG_READ_NUM ];
 
+    // FVT: undriven → symbolic init data on reset writes (valid still forced TRUE)
+    DataPath fv_rst_init_data [ REG_WRITE_NUM ];
+
 `ifdef RSD_MARCH_FP_PIPE
     //
     // FP Register
@@ -52,7 +55,6 @@ module RegisterFile(
         .WRITE_NUM( REG_WRITE_NUM )
     ) phyReg (
         .clk( port.clk ),
-        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( regWE ),
         .wa( dstRegNum ),
         .wv( dstRegData ),
@@ -140,7 +142,7 @@ module RegisterFile(
             for (int i = 0; i < REG_WRITE_NUM; i++) begin
                 regWE     [i] = TRUE;
                 dstRegNum [i] = regRstIndex + i;
-                dstRegData[i].data = 'h00000000;
+                dstRegData[i].data  = fv_rst_init_data[i]; // FVT: free/symbolic init data
                 dstRegData[i].valid = TRUE;
             end
         end
@@ -157,7 +159,6 @@ module RegisterFile(
         .WRITE_NUM( FP_WRITE_NUM )
     ) phyFPReg (
         .clk( port.clk ),
-        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( fpRegWE ),
         .wa( dstFPRegNum ),
         .wv( dstFPRegData ),

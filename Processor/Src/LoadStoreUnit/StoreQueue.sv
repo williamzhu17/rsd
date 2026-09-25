@@ -210,7 +210,6 @@ module StoreQueue(
         .WRITE_NUM(STORE_ISSUE_WIDTH)
     ) storeQueueData (
         .clk(port.clk),
-        .rst(port.rst), // FVT: sync reset for formal reset analysis
         .we(sqWE),
         .wa(executedStoreQueuePtrByStore),
         .wv(sqWriteData),

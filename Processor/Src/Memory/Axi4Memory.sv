@@ -228,7 +228,6 @@ output
         .ENTRY_BIT_SIZE(MEMORY_ENTRY_BIT_NUM)
     ) memoryReadDataTable ( 
         .clk(port.M_AXI_ACLK),
-        .rst(~port.M_AXI_ARESETN), // FVT: sync reset for formal reset analysis
         .we(memoryReadDataTableWE),
         .wa(memoryReadDataID),
         .wv(nextMemoryReadData),

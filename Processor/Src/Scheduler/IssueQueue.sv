@@ -135,7 +135,6 @@ module IssueQueue (
         .WRITE_NUM( DISPATCH_WIDTH )
     ) intPayloadRAM (
         .clk( port.clk ),
-        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( port.write ),
         .wa( port.writePtr ),
         .wv( port.intWriteData ),
@@ -151,7 +150,6 @@ module IssueQueue (
         .WRITE_NUM( DISPATCH_WIDTH )
     ) complexPayloadRAM (
         .clk( port.clk ),
-        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( port.write ),
         .wa( port.writePtr ),
         .wv( port.complexWriteData ),
@@ -167,7 +165,6 @@ module IssueQueue (
         .WRITE_NUM( DISPATCH_WIDTH )
     ) memPayloadRAM (
         .clk( port.clk ),
-        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( port.write ),
         .wa( port.writePtr ),
         .wv( port.memWriteData ),
@@ -183,7 +180,6 @@ module IssueQueue (
         .WRITE_NUM( DISPATCH_WIDTH )
     ) fpPayloadRAM (
         .clk( port.clk ),
-        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( port.write ),
         .wa( port.writePtr ),
         .wv( port.fpWriteData ),

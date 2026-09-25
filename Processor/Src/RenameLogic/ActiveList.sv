@@ -129,7 +129,6 @@ module ActiveList(
         .WRITE_NUM( RENAME_WIDTH )
     ) activeList (
         .clk( port.clk ),
-        .rst( port.rst ), // FVT: sync reset for formal reset analysis
         .we( pushTail ),
         .wa( pushedTailPtr ),
         .wv( pushedTailData ),
@@ -358,7 +357,6 @@ module ActiveList(
         .WRITE_NUM(EXEC_STATE_WRITE_NUM)
     )  execState (
         .clk(port.clk),
-        .rst(port.rst), // FVT: sync reset for formal reset analysis
         .we(esWE),
         .wa(esWA),
         .wv(esWV),
@@ -428,7 +426,6 @@ module ActiveList(
         .WRITE_NUM(FFLAGS_STATE_WRITE_NUM)
     )  fflagsState (
         .clk(port.clk),
-        .rst(port.rst), // FVT: sync reset for formal reset analysis
         .we(ffsWE),
         .wa(ffsWA),
         .wv(ffsWV),
@@ -493,7 +490,6 @@ module ActiveList(
         .WRITE_NUM(EXEC_STATE_WRITE_NUM)
     ) execStateRef (
         .clk(port.clk),
-        .rst(port.rst), // FVT: sync reset for formal reset analysis
         .we(esRefWE),
         .wa(esRefWA),
         .wv(esRefWV),

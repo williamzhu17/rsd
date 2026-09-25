@@ -85,8 +85,6 @@ output
         end
     `else
         logic clk;
-        logic rst; // FVT: sync reset for formal reset analysis
-        assign rst = 1'b0;
         `ifdef RSD_SYNTHESIS
             SingleClock clkgen( clk_p, clk_n, clk );
         `else

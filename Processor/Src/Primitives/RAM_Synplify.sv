@@ -534,15 +534,16 @@ module RegisterMultiPortRAM #(
     typedef logic [ENTRY_BIT_SIZE-1: 0] Value;
 
     Value array[ENTRY_NUM];
-    
-    generate 
-        for (genvar i = 0; i < WRITE_NUM; i++) begin
-            always_ff @(posedge clk) begin
-                if (we[i])
-                    array[ wa[i] ] <= wv[i];
-            end
+
+    // FVT: single always_ff for all write ports (avoid multi-driven array / IMDS001) BEGIN
+    // Same-address collisions: higher port index wins (last assignment in the loop).
+    always_ff @(posedge clk) begin
+        for (int i = 0; i < WRITE_NUM; i++) begin
+            if (we[i])
+                array[ wa[i] ] <= wv[i];
         end
-    endgenerate
+    end
+    // FVT END
 
     always_comb begin
         for (int i = 0; i < READ_NUM; i++) begin
