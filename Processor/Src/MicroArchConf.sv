@@ -30,7 +30,7 @@ localparam CONF_PSCALAR_FP_NUM = 64;
 localparam CONF_ISSUE_QUEUE_ENTRY_NUM = 16;
 
 // The number of active-list (ROB: reorder buffer) entries
-localparam CONF_ACTIVE_LIST_ENTRY_NUM = 64;
+localparam CONF_ACTIVE_LIST_ENTRY_NUM = 16;
 
 // The number of replay-queue entries
 localparam CONF_REPLAY_QUEUE_ENTRY_NUM = 20;
@@ -83,12 +83,12 @@ localparam CONF_STORE_QUEUE_ENTRY_NUM = 16; // The size of a store queue
 
 // --- Predictors
 // Branch predictor
-localparam CONF_BTB_ENTRY_NUM = 1024;
-localparam CONF_PHT_ENTRY_NUM = 2048;
-localparam CONF_BRANCH_GLOBAL_HISTORY_BIT_WIDTH = 10;   // Global history length for g-share 
+localparam CONF_BTB_ENTRY_NUM = 32;
+localparam CONF_PHT_ENTRY_NUM = 32;
+localparam CONF_BRANCH_GLOBAL_HISTORY_BIT_WIDTH = 2;   // Global history length for g-share 
 
 // Memory dependency predictor
-localparam CONF_MDT_ENTRY_NUM = 1024;   // The number of prediction table entries.
+localparam CONF_MDT_ENTRY_NUM = 16;   // The number of prediction table entries.
 
 
 // --- D-cache
