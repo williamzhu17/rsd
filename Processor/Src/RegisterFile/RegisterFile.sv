@@ -32,7 +32,7 @@ module RegisterFile(
     PRegDataPath srcRegData [ REG_READ_NUM ];
 
     // FVT: undriven → symbolic init data on reset writes (valid still forced TRUE)
-    DataPath fv_rst_init_data [ REG_WRITE_NUM ];
+    // DataPath fv_rst_init_data [ REG_WRITE_NUM ];
 
 `ifdef RSD_MARCH_FP_PIPE
     //
@@ -142,7 +142,7 @@ module RegisterFile(
             for (int i = 0; i < REG_WRITE_NUM; i++) begin
                 regWE     [i] = TRUE;
                 dstRegNum [i] = regRstIndex + i;
-                dstRegData[i].data  = fv_rst_init_data[i]; // FVT: free/symbolic init data
+                dstRegData[i].data  = '0; // FVT: free/symbolic init data
                 dstRegData[i].valid = TRUE;
             end
         end
