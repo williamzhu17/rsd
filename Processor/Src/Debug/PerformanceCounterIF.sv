@@ -80,6 +80,9 @@ interface PerformanceCounterIF( input logic clk, rst );
 `else
     // Dummy to suppress warning.
     PerfCounterPath perfCounter;
+    // FVT: CSR_Unit still reads this for mhpmcounter*; tie off so it is not free BEGIN
+    assign perfCounter = '0;
+    // FVT END
 
     modport PerformanceCounter (
     input

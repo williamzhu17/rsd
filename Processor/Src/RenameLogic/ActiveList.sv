@@ -141,11 +141,18 @@ module ActiveList(
     logic activeListEntryValid[ACTIVE_LIST_ENTRY_NUM];
     ActiveListEntry activeListEntry[ACTIVE_LIST_ENTRY_NUM];
 
+    // Read the RAM's storage directly (no debugValue). Only valid while the
+    // active list RAM is a single bank (1 read / 1 write port).
+    `RSD_STATIC_ASSERT(
+        RENAME_WIDTH == 1 && COMMIT_WIDTH == 1,
+        "FVT activeListEntry assumes a single-bank active list RAM."
+    );
+
     generate
         for (genvar i = 0; i < ACTIVE_LIST_ENTRY_NUM; i++) begin
             assign activeListEntryValid[i] =
                 (count != 0) && (ActiveListPtrToAge(i, headPtr) < headPtr + count);
-            assign activeListEntry[i] = ActiveListEntry'(activeList.debugValue[i]);
+            assign activeListEntry[i] = ActiveListEntry'(activeList.genblk1.rBank.array[i]);
         end
     endgenerate
 

@@ -33,7 +33,7 @@ localparam CONF_ISSUE_QUEUE_ENTRY_NUM = 16;
 localparam CONF_ACTIVE_LIST_ENTRY_NUM = 16;
 
 // The number of replay-queue entries
-localparam CONF_REPLAY_QUEUE_ENTRY_NUM = 20;
+localparam CONF_REPLAY_QUEUE_ENTRY_NUM = 8;
 
 // The following macros can be defined from outside this file.
 //  (e.g., CoreSources.mk or SynthesisMacros.sv)

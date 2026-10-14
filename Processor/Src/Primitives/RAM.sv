@@ -8,6 +8,14 @@
 
 `include "BasicMacros.sv"
 
+// FVT: drop the write-only debugValue shadow arrays for formal BEGIN
+`ifdef RSD_SYNTHESIS
+    `define RSD_RAM_NO_DEBUG_VALUE
+`elsif RSD_FV_DISABLE_RAM_DEBUG_VALUE
+    `define RSD_RAM_NO_DEBUG_VALUE
+`endif
+// FVT END
+
 //
 // -- Block RAM configured for READ_FIRST mode.
 // 
@@ -205,7 +213,7 @@ module BlockMultiPortRAM #(
     endgenerate
 
     // For Debug
-    `ifndef RSD_SYNTHESIS
+    `ifndef RSD_RAM_NO_DEBUG_VALUE // FVT: was RSD_SYNTHESIS
         Value debugValue[ENTRY_NUM];
         always_ff @(posedge clk) begin
             for (int i = 0; i < WRITE_NUM; i++) begin
@@ -854,7 +862,7 @@ module LVT_DistributedMultiPortRAM #(
     endgenerate
     
     // For Debug
-`ifndef RSD_SYNTHESIS
+`ifndef RSD_RAM_NO_DEBUG_VALUE // FVT: was RSD_SYNTHESIS
     // This signal will be written in a test bench, so set public for verilator.
     Value debugValue[ ENTRY_NUM ] /*verilator public*/;  
     always_ff @ ( posedge clk ) begin
@@ -994,7 +1002,7 @@ module XOR_DistributedMultiPortRAM #(
     endgenerate
     
     // For Debug
-`ifndef RSD_SYNTHESIS
+`ifndef RSD_RAM_NO_DEBUG_VALUE // FVT: was RSD_SYNTHESIS
     Value debugValue[ENTRY_NUM];
     always_ff @(posedge clk) begin
         for (int i = 0; i < WRITE_NUM; i++) begin
@@ -1035,8 +1043,14 @@ module DistributedMultiPortRAM #(
     typedef logic [INDEX_BIT_SIZE-1: 0] Address;
     typedef logic [ENTRY_BIT_SIZE-1: 0] Value;
 
-    generate 
-        if ((READ_NUM < 2 && WRITE_NUM && ENTRY_BIT_SIZE < 8) || 
+    generate
+`ifdef RSD_FV_FLAT_MULTIPORT_RAM
+        // FVT: single flat array instead of LVT/XOR bank replication BEGIN
+        RegisterMultiPortRAM #(ENTRY_NUM, ENTRY_BIT_SIZE, READ_NUM, WRITE_NUM)
+            body(clk, we, wa, wv, ra, rv);
+        // FVT END
+`else
+        if ((READ_NUM < 2 && WRITE_NUM && ENTRY_BIT_SIZE < 8) ||
             (INDEX_BIT_SIZE <= 4 && ENTRY_BIT_SIZE > 64)) begin
 `ifdef RSD_SYNTHESIS_OPT_MICROSEMI
             RegisterMultiPortRAM #(ENTRY_NUM, ENTRY_BIT_SIZE, READ_NUM, WRITE_NUM)
@@ -1051,10 +1065,11 @@ module DistributedMultiPortRAM #(
             LVT_DistributedMultiPortRAM#(ENTRY_NUM, ENTRY_BIT_SIZE, READ_NUM, WRITE_NUM)
                 body(clk, we, wa, wv, ra, rv);
         end
+`endif
     endgenerate
 
     // For Debug
-`ifndef RSD_SYNTHESIS
+`ifndef RSD_RAM_NO_DEBUG_VALUE // FVT: was RSD_SYNTHESIS
     Value debugValue[ENTRY_NUM] /*verilator public*/;
     always_ff @(posedge clk) begin
         for (int i = 0; i < WRITE_NUM; i++) begin
@@ -1121,7 +1136,7 @@ module RegisterMultiPortRAM #(
     end
 
     // For Debug
-`ifndef RSD_SYNTHESIS
+`ifndef RSD_RAM_NO_DEBUG_VALUE // FVT: was RSD_SYNTHESIS
     Value debugValue[ENTRY_NUM] /*verilator public*/;
     always_ff @(posedge clk) begin
         for (int i = 0; i < WRITE_NUM; i++) begin
@@ -1181,7 +1196,7 @@ module DistributedMultiBankRAM #(
     endgenerate
 
 
-`ifndef RSD_SYNTHESIS
+`ifndef RSD_RAM_NO_DEBUG_VALUE // FVT: was RSD_SYNTHESIS
     // For Debug
     // This signal will be written in a test bench, so set public for verilator.
     Value debugValue[ ENTRY_NUM ] /*verilator public*/;
@@ -1378,7 +1393,7 @@ module BlockMultiBankRAM #(
         end
     endgenerate
 
-`ifndef RSD_SYNTHESIS
+`ifndef RSD_RAM_NO_DEBUG_VALUE // FVT: was RSD_SYNTHESIS
     // For Debug
     // This signal will be written in a test bench, so set public for verilator.
     Value debugValue[ ENTRY_NUM ] /*verilator public*/;
