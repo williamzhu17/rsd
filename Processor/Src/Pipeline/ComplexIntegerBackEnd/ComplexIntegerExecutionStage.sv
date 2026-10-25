@@ -134,6 +134,11 @@ module ComplexIntegerExecutionStage(
 
     always_comb begin
 
+`ifndef RSD_MARCH_UNIFIED_MULDIV_MEM_PIPE
+        // FVT: stall was undriven upstream (free input in formal); tie to 0 to match sim/synth
+        mulDivUnit.stall = FALSE;
+`endif
+
         for (int i = 0; i < COMPLEX_ISSUE_WIDTH; i++) begin
 
 `ifndef RSD_MARCH_UNIFIED_MULDIV_MEM_PIPE
