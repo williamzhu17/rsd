@@ -142,9 +142,13 @@ output
         // FVT abstracting out icache BEGIN
         // ICache iCache( npStageIF, ifStageIF, cacheSystemIF );
 
+        // Miss injected by the FV harness (duv_fv_stub OBS refetch hold): stalls fetch
+        // on the current PC. Undriven (free) in flows without that harness.
+        logic fvt_ifetch_hold;
+
         always_comb begin
             for (int i = 0; i < FETCH_WIDTH; i++)
-                ifStageIF.icReadHit[i] = ifStageIF.icRE;
+                ifStageIF.icReadHit[i] = ifStageIF.icRE && !fvt_ifetch_hold;
         end
 
         assign cacheSystemIF.icMemAccessReq = '0;
